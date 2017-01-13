@@ -1,0 +1,5 @@
+buildscript {
+    dependencies {
+        classpath 'io.realm:realm-gradle-plugin:2.1.0'
+    }
+}
