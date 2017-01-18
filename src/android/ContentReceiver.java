@@ -1,33 +1,17 @@
 package com.cordova.ble;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.media.RingtoneManager;
-import android.net.Uri;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.onyxbeacon.OnyxBeaconApplication;
-import com.onyxbeacon.listeners.OnyxBeaconsListener;
-import com.onyxbeacon.listeners.OnyxCouponsListener;
-import com.onyxbeacon.listeners.OnyxPushListener;
-import com.onyxbeacon.listeners.OnyxTagsListener;
-import com.onyxbeacon.model.Tag;
-import com.onyxbeacon.model.web.BluemixApp;
-import com.onyxbeacon.rest.model.Coupon;
+import com.onyxbeacon.rest.model.account.BluemixApp;
+import com.onyxbeacon.rest.model.content.Coupon;
+import com.onyxbeacon.rest.model.content.Tag;
 import com.onyxbeaconservice.IBeacon;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Created by Work 2 on 4/2/2015.

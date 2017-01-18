@@ -1,33 +1,31 @@
 package com.cordova.ble;
 
 
-import android.content.Context;
 import android.content.IntentFilter;
+import android.util.Log;
 
+import com.onyxbeacon.OnyxBeaconApplication;
 import com.onyxbeacon.OnyxBeaconManager;
-import com.onyxbeacon.OnyxBeaconErrorListener;
+import com.onyxbeacon.rest.auth.util.AuthData;
 import com.onyxbeacon.rest.auth.util.AuthenticationMode;
+import com.onyxbeacon.rest.model.content.Tag;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
-import org.apache.cordova.ExposedJsApi;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import android.util.Log;
-import com.google.gson.Gson;
-import com.onyxbeacon.OnyxBeaconApplication;
-import com.onyxbeacon.model.Tag;
-import com.onyxbeacon.model.web.BluemixApp;
-import com.onyxbeacon.rest.auth.util.AuthenticationMode;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 
-public class Ble extends CordovaPlugin implements OnyxBeaconErrorListener,BleStateListener  {
+public class Ble extends CordovaPlugin implements BleStateListener  {
 
     private CallbackContext messageChannel;
     // OnyxBeacon SDK
@@ -75,25 +73,38 @@ public class Ble extends CordovaPlugin implements OnyxBeaconErrorListener,BleSta
      */
     @Override
     public boolean execute(final String action, final JSONArray args, final CallbackContext callbackContext)   {
+        messageChannel = callbackContext;
 
         Log.v(TAG, "action=" + action);
         this.cordova.getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 try {
                     if (action.equals("initSDK")) {
-                        beaconManager.initSDK(AuthenticationMode.CLIENT_SECRET_BASED);
+                        String clientId = args.getString(0);
+                        String secret = args.getString(1);
+                        Log.d("Ble","clientId = " + clientId + " secret = " + secret);
+                        AuthData authData = new AuthData();
+                        authData.setAuthenticationMode(AuthenticationMode.CLIENT_SECRET_BASED);
+                        authData.setSecret(secret);
+                        authData.setClientId(clientId);
+                        beaconManager.setAuthData(authData);
+                        beaconManager.setAPIEndpoint("​https://connect.onyxbeacon.com​");
                         callbackContext.success("Success");
                     } else if (action.equals("isBluetoothAvailable")) {
-                        Boolean isBluetooth = beaconManager.isBluetoothAvailable();
-                        callbackContext.success(isBluetooth ? 1 : 0);
+                        // TODO-Deprecated
+//                        Boolean isBluetooth = beaconManager.isBluetoothAvailable();
+//                        callbackContext.success(isBluetooth ? 1 : 0);
+                        callbackContext.success("Deprecated");
                     } else if (action.equals("enableBluetooth")) {
-                        beaconManager.enableBluetooth();
-                        callbackContext.success("Success");
+                        // TODO-Deprecated
+//                        beaconManager.enableBluetooth();
+//                        callbackContext.success("Success");
+                        callbackContext.success("Deprecated");
                     } else if (action.equals("getTags")) {
                         beaconManager.getTags();
                         callbackContext.success("Success");
                     } else if (action.equals("sendGenericUserProfile")) {
-                        beaconManager.sendGenericUserProfile(args.getString(0));
+                        beaconManager.sendGenericUserProfile(jsonToMap(args.getJSONObject(0)));
                         callbackContext.success("Success");
                     } else if (action.equals("setForegroundMode")) {
                         beaconManager.setForegroundMode(args.getBoolean(0));
@@ -111,11 +122,15 @@ public class Ble extends CordovaPlugin implements OnyxBeaconErrorListener,BleSta
                         Boolean isInForeground = beaconManager.isInForeground();
                         callbackContext.success(isInForeground ? 1 : 0);
                     } else if (action.equals("isCouponEnabled")) {
-                        Boolean isCouponEnabled = beaconManager.isCouponEnabled();
-                        callbackContext.success(isCouponEnabled ? 1 : 0);
+                        // TODO-Deprecated
+//                        Boolean isCouponEnabled = beaconManager.isCouponEnabled();
+//                        callbackContext.success(isCouponEnabled ? 1 : 0);
+                        callbackContext.success("Deprecated");
                     } else if (action.equals("isAPIEnabled")) {
-                        Boolean isAPIEnabled = beaconManager.isAPIEnabled();
-                        callbackContext.success(isAPIEnabled ? 1 : 0);
+                        // TODO-Deprecated
+//                        Boolean isAPIEnabled = beaconManager.isAPIEnabled();
+//                        callbackContext.success(isAPIEnabled ? 1 : 0);
+                        callbackContext.success("Deprecated");
                     } else if (action.equals("setCouponEnabled")) {
                         beaconManager.setCouponEnabled(args.getBoolean(0));
                         callbackContext.success("Success");
@@ -138,8 +153,10 @@ public class Ble extends CordovaPlugin implements OnyxBeaconErrorListener,BleSta
                         beaconManager.sendDeviceToken(args.getString(0), args.getString(1));
                         callbackContext.success("Success");
                     } else if (action.equals("setAuthExtraData")) {
-                        beaconManager.setAuthExtraData(args.getString(0));
-                        callbackContext.success("Success");
+                        // TODO-Deprecated
+//                        beaconManager.setAuthExtraData(args.getString(0));
+//                        callbackContext.success("Success");
+                        callbackContext.success("Deprecated");
                     } else if (action.equals("onPause")) {
                         beaconManager.setForegroundMode(false);
                         // Unregister content receiver
@@ -160,12 +177,13 @@ public class Ble extends CordovaPlugin implements OnyxBeaconErrorListener,BleSta
                         cordova.getActivity().registerReceiver(mContentReceiver, new IntentFilter(CONTENT_INTENT_FILTER));
                         receiverRegistered = true;
 
-                        if (beaconManager.isBluetoothAvailable()) {
-                            // Enable scanner in foreground mode and register receiver
-                            beaconManager.setForegroundMode(true);
-                        } else {
-                            //Toast.makeText(this, "Please turn on bluetooth", Toast.LENGTH_LONG).show();
-                        }
+//                        if (beaconManager.isBluetoothAvailable()) {
+//                            // Enable scanner in foreground mode and register receiver
+//                            beaconManager.setForegroundMode(true);
+//                        } else {
+//                            //Toast.makeText(this, "Please turn on bluetooth", Toast.LENGTH_LONG).show();
+//                        }
+                        beaconManager.setForegroundMode(true);
                         callbackContext.success("Success");
                     } else if (action.equals("setTagsFilterForCoupons")) {
 
@@ -191,10 +209,12 @@ public class Ble extends CordovaPlugin implements OnyxBeaconErrorListener,BleSta
                         beaconManager.sendLogs(reporter);
                         callbackContext.success("sendReport Invoked");
                     } else {
+                        Log.e("Ble","Unknown action " + action);
                         sendfalse = true;
                     }
                 } catch (JSONException e) {
                     callbackContext.success(e.getMessage());
+                    Log.e("Ble","Unknown JSONException " + e.getMessage());
 
                     sendfalse = true;
                 }
@@ -202,16 +222,59 @@ public class Ble extends CordovaPlugin implements OnyxBeaconErrorListener,BleSta
 
         });
 
-        if(sendfalse)
-            return false;
-        return true;
+        return !sendfalse;
+    }
+
+    public static HashMap<String, Object> jsonToMap(JSONObject json) throws JSONException {
+        HashMap<String, Object> retMap = new HashMap<String, Object>();
+
+        if(json != JSONObject.NULL) {
+            retMap = toMap(json);
+        }
+        return retMap;
+    }
+
+    public static HashMap<String, Object> toMap(JSONObject object) throws JSONException {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+
+        Iterator<String> keysItr = object.keys();
+        while(keysItr.hasNext()) {
+            String key = keysItr.next();
+            Object value = object.get(key);
+
+            if(value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            }
+
+            else if(value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    public static List<Object> toList(JSONArray array) throws JSONException {
+        List<Object> list = new ArrayList<Object>();
+        for(int i = 0; i < array.length(); i++) {
+            Object value = array.get(i);
+            if(value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            }
+
+            else if(value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            list.add(value);
+        }
+        return list;
     }
 
     public void onError(int errorCode, Exception e) {
         String js = String.format(
                 "window.cordova.plugins.Ble.onyxBeaconError('%d:%s');",
                 errorCode,e.getMessage());
-        webView.sendJavascript(js);
+        webView.loadUrl("javascript:"+js);
     }
 
 
@@ -219,7 +282,7 @@ public class Ble extends CordovaPlugin implements OnyxBeaconErrorListener,BleSta
         String js = String.format(
                 "window.cordova.plugins.Ble.onTagsReceived('%s');",
                 tags);
-        webView.sendJavascript(js);
+        webView.loadUrl("javascript:"+js);
     }
 
 
@@ -228,7 +291,7 @@ public class Ble extends CordovaPlugin implements OnyxBeaconErrorListener,BleSta
         String js = String.format(
                 "window.cordova.plugins.Ble.didRangeBeaconsInRegion('%s');",
                 beacons);
-        webView.sendJavascript(js);
+        webView.loadUrl("javascript:"+js);
     }
 
 
@@ -236,21 +299,21 @@ public class Ble extends CordovaPlugin implements OnyxBeaconErrorListener,BleSta
         String js = String.format(
                 "window.cordova.plugins.Ble.deleteCoupon('%d,%d');",
                 var1,var2);
-        webView.sendJavascript(js);
+        webView.loadUrl("javascript:"+js);
     }
 
     public void markAsTapped( long  var1) {
         String js = String.format(
                 "window.cordova.plugins.Ble.markAsTapped('%d');",
                 var1);
-        webView.sendJavascript(js);
+        webView.loadUrl("javascript:"+js);
     }
 
     public void markAsOpened( long  var1) {
         String js = String.format(
                 "window.cordova.plugins.Ble.markAsOpened('%d');",
                 var1);
-        webView.sendJavascript(js);
+        webView.loadUrl("javascript:"+js);
     }
 
 
@@ -258,14 +321,14 @@ public class Ble extends CordovaPlugin implements OnyxBeaconErrorListener,BleSta
         String js = String.format(
                 "window.cordova.plugins.Ble.onCouponsReceived('%s,%s');",
                 coupons,beacon);
-        webView.sendJavascript(js);
+        webView.loadUrl("javascript:"+js);
     }
 
     public void onBluemixCredentialsReceived( String blueMix ) {
         String js = String.format(
                 "window.cordova.plugins.Ble.onBluemixCredentialsReceived('%s');",
                 blueMix);
-        webView.sendJavascript(js);
+        webView.loadUrl("javascript:"+js);
     }
 
 
@@ -285,10 +348,6 @@ public class Ble extends CordovaPlugin implements OnyxBeaconErrorListener,BleSta
 
         }
     }
-
-
-
-
 
 }
 

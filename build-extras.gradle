@@ -1,5 +1,12 @@
-buildscript {
-    dependencies {
-        classpath 'io.realm:realm-gradle-plugin:2.1.0'
-    }
+repositories {    
+  jcenter()
+  flatDir {
+      dirs 'libs'
+   }
+}
+
+dependencies {
+   compile(name:'OnyxBeaconLibrary-release', ext:'aar')
+   compile 'com.google.android.gms:play-services-location:8.4.0' 
+   compile 'com.squareup.retrofit:retrofit:1.9.0' 
 }
