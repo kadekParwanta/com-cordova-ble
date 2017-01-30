@@ -3,6 +3,7 @@ package com.cordova.ble;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.onyxbeacon.OnyxBeaconApplication;
@@ -39,37 +40,33 @@ public class ContentReceiver extends BroadcastReceiver {
 
     public void onReceive(Context context, Intent intent) {
         String payloadType = intent.getStringExtra(OnyxBeaconApplication.PAYLOAD_TYPE);
+        Log.d("ContentReceiver","onReceive " + payloadType);
 
-        if (payloadType == OnyxBeaconApplication.TAG_TYPE) {
-
+        if (payloadType.equals(OnyxBeaconApplication.TAG_TYPE)) {
             ArrayList<Tag> tagsList = intent.getParcelableArrayListExtra(OnyxBeaconApplication.EXTRA_TAGS);
             blePlugin.onTagsReceived(gson.toJson(tagsList));
         }
-        else if (payloadType == OnyxBeaconApplication.BEACON_TYPE) {
+        else if (payloadType.equals(OnyxBeaconApplication.BEACON_TYPE)) {
                 ArrayList<IBeacon> beacons = intent.getParcelableArrayListExtra(OnyxBeaconApplication.EXTRA_BEACONS);
                 blePlugin.didRangeBeaconsInRegion(gson.toJson(beacons));
         }
-        else if (payloadType == OnyxBeaconApplication.COUPON_TYPE) {
-
+        else if (payloadType.equals(OnyxBeaconApplication.COUPON_TYPE)) {
             ArrayList<Coupon> coupons = intent.getParcelableArrayListExtra(OnyxBeaconApplication.EXTRA_COUPONS);
             IBeacon beacon = intent.getParcelableExtra(OnyxBeaconApplication.EXTRA_BEACON);
             blePlugin.onCouponsReceived(gson.toJson(coupons), gson.toJson(beacon));
-
         }
-        else if (payloadType == OnyxBeaconApplication.PUSH_TYPE) {
+        else if (payloadType.equals(OnyxBeaconApplication.PUSH_TYPE)) {
             BluemixApp bluemixApp = intent.getParcelableExtra(OnyxBeaconApplication.EXTRA_BLUEMIX);
-            System.out.println("PUSH Received bluemix credentials " + gson.toJson(bluemixApp));
+            Log.d("ContentReceiver","PUSH Received bluemix credentials " + gson.toJson(bluemixApp));
             blePlugin.onBluemixCredentialsReceived(gson.toJson(bluemixApp));
 
         }
-        else if (payloadType == OnyxBeaconApplication.WEB_REQUEST_TYPE) {
+        else if (payloadType.equals(OnyxBeaconApplication.WEB_REQUEST_TYPE)) {
             String extraInfo = intent.getStringExtra(OnyxBeaconApplication.EXTRA_INFO);
-            System.out.println("AUTH Web reguest info " + extraInfo);
+            Log.d("ContentReceiver","AUTH Web reguest info " + extraInfo);
             if (extraInfo.equals(OnyxBeaconApplication.REQUEST_UNAUTHORIZED)) {
                 // Pin based session expired
             }
         }
-
-
     }
 }
