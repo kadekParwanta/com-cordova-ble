@@ -1,6 +1,7 @@
 package com.cordova.ble;
 
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.IntentFilter;
 import android.util.Log;
 
@@ -9,6 +10,7 @@ import com.onyxbeacon.OnyxBeaconManager;
 import com.onyxbeacon.rest.auth.util.AuthData;
 import com.onyxbeacon.rest.auth.util.AuthenticationMode;
 import com.onyxbeacon.rest.model.content.Tag;
+import com.onyxbeacon.service.logging.LoggingStrategy;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -45,7 +47,6 @@ public class Ble extends CordovaPlugin implements BleStateListener  {
 
         Log.v(TAG, "initialized BLE=" );
 
-
         super.initialize(cordova, webView);
         instance = this;
         beaconManager = OnyxBeaconApplication.getOnyxBeaconManager(cordova.getActivity());
@@ -56,10 +57,12 @@ public class Ble extends CordovaPlugin implements BleStateListener  {
         mBleReceiver.setBleStateListener(this);
 
         BLE_INTENT_FILTER = cordova.getActivity().getPackageName() + ".scan";
+        Log.d("Ble","initialize scan intent filter = " + BLE_INTENT_FILTER);
         cordova.getActivity().registerReceiver(mBleReceiver, new IntentFilter(BLE_INTENT_FILTER));
         bleStateRegistered = true;
 
         CONTENT_INTENT_FILTER = cordova.getActivity().getPackageName() + ".content";
+        Log.d("Ble","initialize content intent filter = " + CONTENT_INTENT_FILTER);
         cordova.getActivity().registerReceiver(mContentReceiver, new IntentFilter(CONTENT_INTENT_FILTER));
         receiverRegistered = true;
     }
@@ -80,15 +83,29 @@ public class Ble extends CordovaPlugin implements BleStateListener  {
             public void run() {
                 try {
                     if (action.equals("initSDK")) {
+                        beaconManager.setDebugMode(LoggingStrategy.DEBUG);
+                        beaconManager.setAPIEndpoint("https://connect.onyxbeacon.com");
+                        beaconManager.setCouponEnabled(true);
+                        beaconManager.setAPIContentEnabled(true);
+                        beaconManager.enableGeofencing(true);
+                        beaconManager.setLocationTrackingEnabled(true);
                         String clientId = args.getString(0);
                         String secret = args.getString(1);
-                        Log.d("Ble","clientId = " + clientId + " secret = " + secret);
                         AuthData authData = new AuthData();
                         authData.setAuthenticationMode(AuthenticationMode.CLIENT_SECRET_BASED);
                         authData.setSecret(secret);
                         authData.setClientId(clientId);
                         beaconManager.setAuthData(authData);
-                        beaconManager.setAPIEndpoint("​https://connect.onyxbeacon.com​");
+                        if (BluetoothAdapter.getDefaultAdapter() == null) {
+                            Log.e(TAG, "Device does not support Bluetooth");
+                        } else {
+                            if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+                                Log.e(TAG, "Please turn on bluetooth");
+                            } else {
+                                // Enable scanner in foreground mode and register receiver
+                                beaconManager.setForegroundMode(true);
+                            }
+                        }
                         callbackContext.success("Success");
                     } else if (action.equals("isBluetoothAvailable")) {
                         // TODO-Deprecated
@@ -160,10 +177,14 @@ public class Ble extends CordovaPlugin implements BleStateListener  {
                     } else if (action.equals("onPause")) {
                         beaconManager.setForegroundMode(false);
                         // Unregister content receiver
-
                         if (bleStateRegistered) {
                             cordova.getActivity().unregisterReceiver(mBleReceiver);
                             bleStateRegistered = false;
+                        }
+
+                        if (receiverRegistered){
+                            cordova.getActivity().unregisterReceiver(mContentReceiver);
+                            receiverRegistered = false;
                         }
 
                         callbackContext.success("Success");
@@ -171,19 +192,23 @@ public class Ble extends CordovaPlugin implements BleStateListener  {
                         if (mBleReceiver == null) mBleReceiver = BleStateReceiver.getInstance();
                         cordova.getActivity().registerReceiver(mContentReceiver, new IntentFilter(CONTENT_INTENT_FILTER));
                         receiverRegistered = true;
+                        mBleReceiver.setBleStateListener(instance);
 
                         if (mContentReceiver == null)
                             mContentReceiver = ContentReceiver.getInstance(instance);
                         cordova.getActivity().registerReceiver(mContentReceiver, new IntentFilter(CONTENT_INTENT_FILTER));
                         receiverRegistered = true;
-
-//                        if (beaconManager.isBluetoothAvailable()) {
-//                            // Enable scanner in foreground mode and register receiver
-//                            beaconManager.setForegroundMode(true);
-//                        } else {
-//                            //Toast.makeText(this, "Please turn on bluetooth", Toast.LENGTH_LONG).show();
-//                        }
-                        beaconManager.setForegroundMode(true);
+                        if (BluetoothAdapter.getDefaultAdapter() == null) {
+                            Log.e(TAG, "Device does not support Bluetooth");
+                        } else {
+                            if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+                                Log.e(TAG, "Please turn on bluetooth");
+                            } else {
+                                // Enable scanner in foreground mode and register receiver
+                                beaconManager = OnyxBeaconApplication.getOnyxBeaconManager(cordova.getActivity());
+                                beaconManager.setForegroundMode(true);
+                            }
+                        }
                         callbackContext.success("Success");
                     } else if (action.equals("setTagsFilterForCoupons")) {
 
