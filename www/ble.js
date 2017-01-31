@@ -1,5 +1,3 @@
-cordova.define("com-cordova-ble.ble", function (require, exports, module) {
-
     var argscheck = require('cordova/argscheck'),
         channel = require('cordova/channel'),
         utils = require('cordova/utils'),
@@ -650,6 +648,3 @@ cordova.define("com-cordova-ble.ble", function (require, exports, module) {
     }
 
     module.exports = Ble;
-
-
-});

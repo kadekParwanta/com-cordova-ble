@@ -9,27 +9,48 @@ module.exports = function (ctx) {
 
     var platformRoot = path.join(ctx.opts.projectRoot, 'platforms/android');
     var gradleFileLocation = path.join(platformRoot, 'build.gradle');
-    // var buildextraspos = path.join(ctx.opts.plugin.dir, 'build-extras.gradle');
+    var manifestFileLocation = path.join(platformRoot, 'AndroidManifest.xml');
 
-    // var reader = fs.createReadStream(buildextraspos);
-    // var writer = fs.createWriteStream(platformRoot);
-
-    // writer.on('pipe', function(src){
-    //     console.log('copying ' + buildextraspos + 'to ' + platformRoot);
-    //     deferral.resolve();
-    // })
-    // reader.pipe(writer);
-
+    //Modify build.gradle
     fs.readFile(gradleFileLocation, 'utf-8', function (err, data) {
         if (err) throw err;
+        var newValue = data;
 
-        var newValue = data.replace('classpath', 'classpath \'io.realm:realm-gradle-plugin:2.1.0\'\nclasspath');
-        newValue = newValue.replace('jcenter()','mavenCentral()\njcenter()')
+        //add classpath
+        if (data.indexOf('io.realm:realm-gradle-plugin') === -1) {
+            newValue = newValue.replace('classpath', 'classpath \'io.realm:realm-gradle-plugin:2.1.0\'\nclasspath');
+        }
+
+        //add repository
+        if (newValue.indexOf('mavenCentral()') === -1) {
+            newValue = newValue.replace('jcenter()','mavenCentral()\njcenter()')
+        }
+        
 
         fs.writeFile(gradleFileLocation, newValue, 'utf-8', function (err) {
             if (err) throw err;
             console.log('build.gradle complete');
-            deferral.resolve();
+
+            //Modify AndroidManifest.xml
+            fs.readFile(manifestFileLocation, 'utf-8', function(err, data){
+                var newManifest = data;
+                //add tools namespace
+                if (data.indexOf('http://schemas.android.com/tools') === -1) {
+                    newManifest = newManifest.replace('xmlns:android','xmlns:tools=\"http://schemas.android.com/tools\"\nxmlns:android');
+                }
+                
+                //add tools:replace
+                if (newManifest.indexOf('tools:replace=\"android:icon\"') === -1) {
+                    newManifest = newManifest.replace('<application','<application tools:replace=\"android:icon\" ');
+                }
+
+                fs.writeFile(manifestFileLocation, newManifest, 'utf-8', function(err){
+                    if (err) throw err;
+                    console.log('AndroidManifest.xml complete');
+                    deferral.resolve();
+                })
+            })
+            
         });
     });
 
