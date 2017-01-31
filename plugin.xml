@@ -60,7 +60,7 @@
 
             <meta-data android:name="clientid" android:value="cd8d429b30f58c577f2bc0dbfd07d03b07de7d2f" />
             <meta-data android:name="secret" android:value="ce7ada82d2b3917dd35520747bf6492b4f5e1d4c" />   
-            <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" /> 
+            <meta-data tools:replace="android:value" android:name="com.google.android.gms.version" android:value="8487000" /> 
         </config-file>
 
         <source-file src="src/android/ContentReceiver.java" target-dir="src/com/cordova/ble"/>
