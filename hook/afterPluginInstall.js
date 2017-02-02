@@ -1,6 +1,6 @@
 module.exports = function (ctx) {
     // make sure android platform is part of build
-    if (ctx.opts.platforms.indexOf('android') < 0) {
+    if (ctx.opts.cordova.platforms.indexOf('android') < 0) {
         return;
     }
     var fs = ctx.requireCordovaModule('fs'),
