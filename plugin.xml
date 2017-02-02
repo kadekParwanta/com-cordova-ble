@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"          
+        xmlns:tools="http://schemas.android.com/tools"   
         id="com-cordova-ble"
         version="2.0.1-dev">
     <name>Ble</name>
@@ -8,12 +10,16 @@
     <license>Commercial</license>
 
     <engines>
-        <engine name="cordova" version=">=3.4.0"/>
+        <engine name="cordova" version=">=4.0.0"/>
     </engines>
    
     <js-module src="www/ble.js" name="ble">
         <clobbers target="ble"/>
     </js-module>
+
+    <preference name="CLIENT_ID" default="" />
+    <preference name="SECRET" default="" />
+    <preference name="GMS_VERSION" default="8487000" />
 
     <!-- android -->
     <platform name="android">
@@ -37,6 +43,7 @@
             <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
             <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
         </config-file>
+       
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
             <provider
@@ -58,9 +65,9 @@
                 </intent-filter>
             </receiver>
 
-            <meta-data android:name="clientid" android:value="cd8d429b30f58c577f2bc0dbfd07d03b07de7d2f" />
-            <meta-data android:name="secret" android:value="ce7ada82d2b3917dd35520747bf6492b4f5e1d4c" />   
-            <meta-data tools:replace="android:value" android:name="com.google.android.gms.version" android:value="8487000" /> 
+            <meta-data android:name="clientid" android:value="$CLIENT_ID" />
+            <meta-data android:name="secret" android:value="$SECRET" />   
+            <meta-data tools:replace="android:value" android:name="com.google.android.gms.version" android:value="$GMS_VERSION" /> 
         </config-file>
 
         <source-file src="src/android/ContentReceiver.java" target-dir="src/com/cordova/ble"/>
@@ -69,7 +76,7 @@
         <source-file src="src/android/Ble.java" target-dir="src/com/cordova/ble"/>
         <framework src="src/android/ble.gradle" custom="true" type="gradleReference"/>
         <resource-file src="src/android/libs/OnyxBeaconLibrary-release.aar" target="libs/OnyxBeaconLibrary-release.aar"/>
-        <hook type="after_plugin_install" src="hook/afterPluginInstall.js" />
+        <hook type="before_plugin_install" src="hook/beforePluginInstall.js" />
         <hook type="before_plugin_uninstall" src="hook/beforePluginUninstall.js"/>
     </platform>
 
