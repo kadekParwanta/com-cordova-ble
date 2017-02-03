@@ -30,14 +30,6 @@
             </feature>
         </config-file>
 
-        <edit-config file="AndroidManifest.xml" target="/manifest" mode="merge">
-            <manifest xmlns:tools="http://schemas.android.com/tools" />
-        </edit-config>
-
-        <edit-config file="AndroidManifest.xml" target="/manifest/application" mode="merge">
-            <application tools:replace="android:icon"/>
-        </edit-config>
-
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <!-- Permissions -->
             <uses-permission android:name="android.permission.BLUETOOTH"/>
@@ -85,8 +77,8 @@
         <source-file src="src/android/Ble.java" target-dir="src/com/cordova/ble"/>
         <framework src="src/android/ble.gradle" custom="true" type="gradleReference"/>
         <resource-file src="src/android/libs/OnyxBeaconLibrary-release.aar" target="libs/OnyxBeaconLibrary-release.aar"/>
-        <!--<hook type="before_plugin_install" src="hook/beforePluginInstall.js" />
-        <hook type="before_plugin_uninstall" src="hook/beforePluginUninstall.js"/>-->
+        <hook type="before_plugin_install" src="hook/beforePluginInstall.js" />
+        <hook type="before_plugin_uninstall" src="hook/beforePluginUninstall.js"/>
     </platform>
 
     <!-- ios -->
