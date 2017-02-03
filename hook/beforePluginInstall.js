@@ -8,15 +8,19 @@ module.exports = function (ctx) {
         deferral = ctx.requireCordovaModule('q').defer();
 
     var platformRoot = path.join(ctx.opts.projectRoot, 'platforms/android');
-    var gradleFileLocation = path.join(platformRoot, 'build.gradle');
     var manifestFileLocation = path.join(platformRoot, 'AndroidManifest.xml');
 
-        //Modify AndroidManifest.xml
+    //Modify AndroidManifest.xml
     fs.readFile(manifestFileLocation, 'utf-8', function(err, data){
-        var newManifest = data;                
+        var newManifest = data;
+        //add tools namespace
+        if (data.indexOf('http://schemas.android.com/tools') === -1) {
+            newManifest = newManifest.replace('xmlns:android','xmlns:tools=\"http://schemas.android.com/tools\"\nxmlns:android');
+        }
+        
         //add tools:replace
         if (newManifest.indexOf('tools:replace=\"android:icon\"') === -1) {
-            newManifest = newManifest.replace('tools:replace=\"android:icon\" ','');
+            newManifest = newManifest.replace('<application','<application tools:replace=\"android:icon\" ');
         }
 
         fs.writeFile(manifestFileLocation, newManifest, 'utf-8', function(err){
@@ -25,6 +29,7 @@ module.exports = function (ctx) {
             deferral.resolve();
         })
     })
-            
+    
+
     return deferral.promise;
 };
