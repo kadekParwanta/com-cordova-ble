@@ -19,6 +19,7 @@
 
     <preference name="CLIENT_ID" default="" />
     <preference name="SECRET" default="" />
+    <preference name="PACKAGE_NAME" default="" />
     <preference name="GMS_VERSION" default="8487000" />
 
     <!-- android -->
@@ -47,7 +48,7 @@
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
             <provider
-                android:authorities="com.kadek.onyxreceiver.provider"
+                android:authorities="$PACKAGE_NAME.provider"
                 android:name="com.onyxbeaconservice.provider.IBeaconProvider"
                 android:enabled="true"
                 android:exported="true">
